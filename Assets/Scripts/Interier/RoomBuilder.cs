@@ -93,8 +93,8 @@ public class RoomBuilder : MonoBehaviour
             "Right Wall"
         );
 
-        var roomScript = room.AddComponent<Room>();
+        /*var roomScript = room.AddComponent<Room>();
         roomScript.SetUp(size);
-        roomScript.transform.position = position;
+        roomScript.transform.position = position;*/
     }
 }

@@ -17,7 +17,8 @@ public static class WallCreator
         };
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         go.AddComponent<MeshCollider>().sharedMesh = mesh;
-        go.AddComponent<MeshRenderer>();
+        var meshRenderer = go.AddComponent<MeshRenderer>();
+        meshRenderer.material = wallInfo.Material;
         go.transform.rotation = rotation;
         go.transform.position = position;
         go.transform.parent = parent;

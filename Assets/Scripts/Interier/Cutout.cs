@@ -14,4 +14,12 @@ public class Cutout
 
     public Vector2 Start => start;
     public Vector2 End => end;
+
+    public Cutout ReverseY(float height) {
+	    return new Cutout(new Vector2(start.x, height - end.y), new Vector2(end.x, height - start.y));
+    }
+    
+    public Cutout ReverseX(float width) {
+	    return new Cutout(new Vector2(width - end.x, start.y), new Vector2(width - start.x, end.y));
+    }
 }
