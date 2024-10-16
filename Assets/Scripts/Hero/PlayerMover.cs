@@ -1,9 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using InputSystem;
 using UnityEngine;
 
-public class Mover : MonoBehaviour
+public class PlayerMover : MonoBehaviour
 {
 	[SerializeField] private float moveSpeed = 5f;
 	
@@ -17,8 +18,8 @@ public class Mover : MonoBehaviour
 
     private void Update()
     {
-        _hor = Input.GetAxisRaw("Horizontal");
-        _ver = Input.GetAxisRaw("Vertical");
+        _hor = GameInputManager.GetAxisRaw("Horizontal");
+        _ver = GameInputManager.GetAxisRaw("Vertical");
     }
 
     private void FixedUpdate() {

@@ -1,7 +1,10 @@
 using System.Linq;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(FrontWallBuilder))]
 public class FrontWallBuilderCustomEditor : Editor
 {
@@ -15,6 +18,7 @@ public class FrontWallBuilderCustomEditor : Editor
         }
     }
 }
+#endif
 
 public class FrontWallBuilder : MonoBehaviour
 {

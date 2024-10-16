@@ -4,7 +4,7 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Camera;
+using Cameras;
 using UnityEngine;
 
 #if UNITY_EDITOR

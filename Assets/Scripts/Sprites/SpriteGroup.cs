@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Sprite {
+namespace Sprites {
 	[RequireComponent(typeof(SortingGroup))]
 	public class SpriteGroup : MonoBehaviour {
 		private SortingGroup _sortingLayer;

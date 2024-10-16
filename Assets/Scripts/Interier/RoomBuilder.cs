@@ -1,7 +1,10 @@
 using Unity.VisualScripting;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(RoomBuilder))]
 public class RoomBuilderInspector : Editor
 {
@@ -19,6 +22,7 @@ public class RoomBuilderInspector : Editor
         }
     }
 }
+#endif
 
 public class RoomBuilder : MonoBehaviour
 {

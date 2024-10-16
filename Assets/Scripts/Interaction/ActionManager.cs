@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Interaction {
 	public class ActionManager : MonoBehaviour {
 		
-		[SerializeField] private Hero.Hero hero;
+		[FormerlySerializedAs("hero")] [SerializeField] private Hero.Player player;
 		
 		[SerializeField] private RectTransform hint;
 		
@@ -40,7 +41,7 @@ namespace Interaction {
 		private void CheckAction() {
 			if ( !Input.GetButtonDown("Action") ) return;
 			if ( ActionTriggers.Count == 0) return;
-			ActionTriggers[0].Notify(hero);
+			ActionTriggers[0].Notify(player);
 		}
 	}
 }

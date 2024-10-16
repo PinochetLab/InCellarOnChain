@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Camera {
+namespace Cameras {
 	public class CameraMover : MonoBehaviour {
 
 		[SerializeField] private UnityEngine.Camera camera;
