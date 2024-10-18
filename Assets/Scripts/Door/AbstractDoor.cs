@@ -4,7 +4,7 @@ using Interaction;
 using UnityEngine;
 
 namespace Door {
-	public abstract class AbstractDoor : MonoBehaviour, IActionable {
+	public abstract class AbstractDoor : AbstractInteractable {
 		
 		/*[SerializeField] private DoorCollider doorCollider;
 		[SerializeField] private Transform hingeTransform;
@@ -127,16 +127,14 @@ namespace Door {
 		private const float ClosedAngle = 0;
 		private const float OpenedAngle = 90;
 		
-		public abstract void PerformAction(IActor actor);
-		
-		protected void ChangeState(IActor actor) {
+		protected void ChangeState(Vector3 characterPosition) {
 			_opened = !_opened;
 			var angle = ClosedAngle;
 			if ( _opened ) {
-				var fromLeft = Vector3.Dot(actor.GetPosition() - transform.position, transform.right) > 0;
+				var toCharacter = characterPosition - transform.position;
+				var fromLeft = Vector3.Dot(toCharacter, transform.right) > 0;
 				angle = OpenedAngle * (fromLeft ? 1 : -1);
 			}
-			Debug.Log(angle);
 			hingeTransform.localRotation = Quaternion.Euler(0, angle, 0);
 		}
 	}

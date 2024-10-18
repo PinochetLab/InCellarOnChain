@@ -141,7 +141,14 @@ public class Room : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
 	    var camera = CameraMover.Camera;
-	    CameraMover.MoveTo(CalculateCameraPosition(camera.fieldOfView, camera.aspect));
+	    var pos = CalculateCameraPosition(camera.fieldOfView, camera.aspect);
+	    if ( name.Contains("Start") ) {
+		    CameraMover.SetPos(pos);
+		    //CameraMover.MoveTo(pos);
+	    }
+	    else {
+		    CameraMover.MoveTo(pos);
+	    }
     }
 
     private Vector3 CalculateCameraPosition(float fov, float aspectRatio) {
@@ -150,7 +157,7 @@ public class Room : MonoBehaviour
 	    var z = Position.z;
 	    var deltaZ1 = Size.y / 2 / Mathf.Tan(fov * Mathf.Deg2Rad / 2);
 	    var deltaZ2 = Size.y / 2 / Mathf.Tan(fov * aspectRatio * Mathf.Deg2Rad / 2);
-	    var delta = Mathf.Max(deltaZ1, deltaZ2);
+	    var delta = Mathf.Max(deltaZ1, deltaZ2) + 0.1f;
 	    return new Vector3(x, y, z - delta);
     }
 }

@@ -5,8 +5,9 @@ using UnityEngine;
 
 namespace Door {
 	public class Door : AbstractDoor {
-		public override void PerformAction(IActor actor) {
-			ChangeState(actor);
+		public override void Interact(Character character) {
+			var needs = InteractionNeeds.Get(character);
+			ChangeState(needs.CharacterPosition);
 		}
 	}
 }

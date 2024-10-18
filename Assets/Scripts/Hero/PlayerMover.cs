@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using InputSystem;
 using UnityEngine;
 
 public class PlayerMover : MonoBehaviour
@@ -16,10 +12,14 @@ public class PlayerMover : MonoBehaviour
 	    _rb = GetComponent<Rigidbody>();
     }
 
+    public bool IsMoving() {
+	    return _hor != 0 || _ver != 0;
+    }
+
     private void Update()
     {
-        _hor = GameInputManager.GetAxisRaw("Horizontal");
-        _ver = GameInputManager.GetAxisRaw("Vertical");
+        _hor = Input.GetAxisRaw("Horizontal");
+        _ver = Input.GetAxisRaw("Vertical");
     }
 
     private void FixedUpdate() {

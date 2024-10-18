@@ -6,10 +6,19 @@ namespace Inventory {
 	public readonly struct ItemTransform : IEquatable<ItemTransform> {
 		public Vector2Int Position { get; }
 		public bool Rotated { get; }
+		
+		public static ItemTransform Moved => new ItemTransform(-Vector2Int.one, false);
+		
+		public bool IsMoved => Position == -Vector2Int.one && !Rotated;
 
 		public ItemTransform(Vector2Int position, bool rotated) {
 			Position = position;
 			Rotated = rotated;
+		}
+		
+		public ItemTransform(ItemTransform other) {
+			Position = other.Position;
+			Rotated = other.Rotated;
 		}
 
 		public Vector2Int RotatedSize(Item item) {
@@ -24,7 +33,6 @@ namespace Inventory {
 			var size = RotatedSize(item);
 			for ( var i = 0; i < size.x; ++i )
 			for ( var j = 0; j < size.y; ++j ) {
-				Debug.Log(i + " " + j + " " + Rotated + " " + size);
 				yield return Position + new Vector2Int(i, j);
 			}
 		} 

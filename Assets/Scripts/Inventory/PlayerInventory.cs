@@ -1,104 +1,162 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Async;
 using Inventory.Display;
 using UnityEngine;
 
 namespace Inventory {
-	public class PlayerInventory : MonoBehaviour, IInventory {
+	public enum InventoryMode { Moving, Adding }
+	public class PlayerInventory : AbstractInventory {
+		private static PlayerInventory _instance;
+		
+		[SerializeField] private PlayerFieldInventory playerFieldInventory;
+		
+		[SerializeField] private FieldInventoryDisplay fieldDisplay;
+		
+		[SerializeField] private GameObject inventoryWindow;
 
-		[SerializeField] private int maxCount = 30;
-		
-		[SerializeField] private int width = 4;
-		
-		[SerializeField] private PlayerInventoryDisplay display;
-		
-		[SerializeField] private ItemLocator itemLocator;
-		
-		private Dictionary<Item, List<ItemTransform>> _itemTransforms = new ();
-		
-		private List<List<InventorySlot>> _slots = new ();
+		private bool _jobStarted;
+		private bool _isOpened;
+		private bool _isMoving;
+		private InventoryMode _inventoryMode;
 
-		[SerializeField] private Item testItem;
+		private Configuration _configuration = null;
+
+		private AddItemCallback _callback;
+
+		private void Close() {
+			SetState(false);
+		}
+
+		private void Open() {
+			SetState(true);
+		}
+
+		private void SetState(bool opened) {
+			_isOpened = opened;
+			inventoryWindow.SetActive(opened);
+		}
 
 		private void Awake() {
-			var count = maxCount;
-			while ( count > 0 ) {
-				List<InventorySlot> slots;
-				if ( count >= width ) {
-					slots = Enumerable.Range(0, 4).Select(_ => InventorySlot.CreateEmpty()).ToList();
-				}
-				else {
-					slots = Enumerable.Range(0, 4).Select(i => 
-						i < count ? InventorySlot.CreateEmpty() : InventorySlot.CreateDenied()).ToList();
-				}
-				_slots.Add(slots);
-				count -= width;
+			playerFieldInventory.OnStartMove.AddListener(OnStartMove);
+			playerFieldInventory.OnFinishMove.AddListener(OnFinishMove);
+			fieldDisplay.AddListeners(OnStartMove, OnFinishMove);
+			SetState(_isOpened);
+		}
+
+		public override void TryAddItem(Item item, AddItemCallback callback) {
+			_inventoryMode = InventoryMode.Adding;
+			_callback = callback;
+			fieldDisplay.Show();
+			var result = fieldDisplay.Inventory.AddItem(item);
+			if ( !result ) {
+				_inventoryMode = InventoryMode.Moving;
+				_callback?.Invoke(new AddItemResult(false));
 			}
-
-			AddItem(testItem, Vector2Int.zero, false);
-			AddItem(testItem, new Vector2Int(2, 0), true);
-			
-			display.SetUp(this, _slots);
-			display.UpdateItems(_itemTransforms);
+			Open();
 		}
 
-		private void AddItem(Item item, Vector2Int position, bool b) {
-			var itemTransform = new ItemTransform(position, b);
-			if (!_itemTransforms.ContainsKey(item)) _itemTransforms.Add(item, new List<ItemTransform>());
-			_itemTransforms[item].Add(itemTransform);
-			
-			itemTransform.GetSlots(item).ToList().ForEach(v => _slots[v.y][v.x].SetItem(item));
+		private void OnStartMove() {
+			_jobStarted = true;
+			_isMoving = true;
+			if ( _inventoryMode == InventoryMode.Moving ) {
+				if ( _configuration == null ) {
+					fieldDisplay.Hide();
+				}
+			}
+			_configuration ??= playerFieldInventory.SaveConfiguration();
+		}
+		
+		private void OnFinishMove() {
+			_isMoving = false;
 		}
 
-		private bool IsPositionValid(Vector2Int position) {
-			return position.x >= 0 && 
-			       position.x < width && 
-			       position.y >= 0 && 
-			       position.y < _slots.Count;
-		}
-
-		private bool IsSlotEmpty(Vector2Int position) {
-			return _slots[position.y][position.x].IsEmpty();
-		}
-
-		// ReSharper disable Unity.PerformanceAnalysis
-		public void TryMoveItem(Item item, ItemTransform itemTransform) {
-			if ( !_itemTransforms.ContainsKey(item) ) return;
-			_itemTransforms[item].Remove(itemTransform);
-			display.UpdateItems(_itemTransforms);
-			
-			itemTransform.GetSlots(item).ToList().ForEach(v => _slots[v.y][v.x].SetEmpty());
-
-			itemLocator.TryLocateItem(item, itemTransform, this, TryMoveCallback);
-			return;
-
-			void TryMoveCallback(ItemTransform? optionalTransform) {
-				var it = optionalTransform ?? itemTransform;
-				_itemTransforms[item].Add(it);
-				it.GetSlots(item).ToList().ForEach(v => _slots[v.y][v.x].SetItem(item));
-				display.UpdateItems(_itemTransforms);
+		private void ProcessTab() {
+			if ( Input.GetButtonDown("Inventory") ) {
+				_isOpened = !_isOpened;
+				SetState(_isOpened);
+				if ( !_isOpened && _jobStarted ) {
+					if ( _isMoving ) {
+						ProcessCancel();
+					}
+					else {
+						if ( fieldDisplay.Inventory.IsEmpty() ) {
+							ProcessSubmit();
+						}
+						else {
+							ProcessCancel();
+						}
+					}
+				}
 			}
 		}
 
-		public bool CanLocateItem(Item item, ItemTransform itemTransform) {
-			return itemTransform.GetSlots(item).All(v => IsPositionValid(v) && IsSlotEmpty(v));
+		private void Update() {
+			ProcessTab();
+			ProcessInput();
 		}
 
-		public IEnumerator<bool> TryAddItem(Item item) {
-			throw new System.NotImplementedException();
+		private void ProcessCancel() {
+			switch (_inventoryMode)
+			{
+				case InventoryMode.Adding:
+					Debug.Log("Adding item stop");
+					_callback?.Invoke(new AddItemResult(false));
+					_inventoryMode = InventoryMode.Moving;
+					break;
+				case InventoryMode.Moving:
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+			playerFieldInventory.LoadConfiguration(_configuration);
+			fieldDisplay.Inventory.Clear();
+			_configuration = null;
+			_jobStarted = false;
+			Close();
+		}
+		
+		private void ProcessSubmit() {
+			switch (_inventoryMode)
+			{
+				case InventoryMode.Adding:
+					if ( fieldDisplay.Inventory.IsEmpty() ) {
+						_callback?.Invoke(new AddItemResult(true));
+						_inventoryMode = InventoryMode.Moving;
+						_jobStarted = false;
+						_configuration = null;
+						Close();
+					}
+					break;
+				case InventoryMode.Moving:
+					if ( fieldDisplay.Inventory.IsEmpty() ) {
+						_jobStarted = true;
+						_configuration = null;
+						Close();
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
-		public bool HasItem(Item item) {
-			return _itemTransforms.ContainsKey(item) && _itemTransforms[item].Count > 0;
+		private void ProcessInput() {
+			if ( _isMoving ) {
+				return;
+			}
+
+			if ( Input.GetMouseButtonDown(1) ) {
+				ProcessCancel();
+			}
+			else if ( Input.GetButtonDown("Interact") ) {
+				ProcessSubmit();
+			}
 		}
 
-		public void RemoveItem(Item item) {
-			throw new System.NotImplementedException();
+		public override bool HasItem(Item item) {
+			return playerFieldInventory.HasItem(item);
+		}
+
+		public override bool IsEmpty() {
+			return playerFieldInventory.IsEmpty();
 		}
 	}
 }

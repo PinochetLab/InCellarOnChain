@@ -1,8 +1,9 @@
-﻿using UnityEngine;
-
-namespace Interaction {
+﻿namespace Interaction {
 	public interface IInteractable {
-		public Vector3 Position { get; }
-		public abstract void Interact();
+		void Interact(Character character);
+
+		void Interact(Character character, string interactionName) {
+			Interact(character);
+		}
 	}
 }

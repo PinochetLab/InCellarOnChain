@@ -12,6 +12,11 @@ namespace Inventory {
 			_item = item;
 		}
 
+		public InventorySlot(InventorySlot slot) {
+			_status = slot._status;
+			_item = slot._item;
+		}
+
 		public void AddItem(Item item) {
 			_status = SlotStatus.Item;
 			_item = item;

@@ -19,6 +19,11 @@ namespace Cameras {
 			_instance._targetPosition = target;
 		}
 
+		public static void SetPos(Vector3 target) {
+			_instance._targetPosition = target;
+			_instance.transform.position = target;
+		}
+
 		public static UnityEngine.Camera Camera => _instance.camera;
 
 		private void Update()
