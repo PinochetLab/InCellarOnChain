@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Cameras {
 	public class CameraMover : MonoBehaviour {
 
-		[SerializeField] private UnityEngine.Camera camera;
+		[SerializeField] private Camera cam;
 		
 		[SerializeField] private float speed = 15;
 		
@@ -24,7 +25,7 @@ namespace Cameras {
 			_instance.transform.position = target;
 		}
 
-		public static UnityEngine.Camera Camera => _instance.camera;
+		public static Camera Cam => _instance.cam;
 
 		private void Update()
 		{

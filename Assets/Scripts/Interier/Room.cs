@@ -140,7 +140,7 @@ public class Room : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other) {
-	    var camera = CameraMover.Camera;
+	    var camera = CameraMover.Cam;
 	    var pos = CalculateCameraPosition(camera.fieldOfView, camera.aspect);
 	    if ( name.Contains("Start") ) {
 		    CameraMover.SetPos(pos);

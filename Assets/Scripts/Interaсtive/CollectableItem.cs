@@ -1,20 +1,24 @@
 ﻿using Interaction;
 using Inventory;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Interaсtive {
 	public class CollectableItem : AbstractInteractable {
 		[SerializeField] private Item item;
+		
+		private readonly UnityEvent _onCollect = new();
 
-		public override void Interact(Character character) {
-			Debug.Log("CollectableItem");
-			var inventory = InteractionNeeds.Get(character).Inventory;
-			inventory.TryAddItem(item, ProcessResult);
+		public override void Interact(Character character, UnityAction callback) {
+			_onCollect.RemoveAllListeners();
+			_onCollect.AddListener(callback);
+			var keeper = InteractionNeeds.Get(character).Keeper;
+			keeper.TryAddItem(item, ProcessResult);
 		}
 
-		private void ProcessResult(AddItemResult result) {
-			Debug.Log($"Result " + result.Success);
-			if ( result.Success ) {
+		private void ProcessResult(bool success) {
+			_onCollect?.Invoke();
+			if ( success ) {
 				DestroyImmediate(gameObject);
 			}
 		}

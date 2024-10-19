@@ -7,7 +7,7 @@ namespace Interaction {
 	[Serializable]
 	public class InteractionNeeds {
 		[SerializeField] private Transform characterTransform;
-		[SerializeField] private AbstractInventory inventory;
+		[SerializeField] private AbstractKeeper keeper;
 		
 		private static Dictionary<Character, InteractionNeeds> _characterNeeds = new ();
 
@@ -19,6 +19,6 @@ namespace Interaction {
 
 		public Vector3 CharacterPosition => characterTransform.position;
 		
-		public IInventory Inventory => inventory;
+		public AbstractKeeper Keeper => keeper;
 	}
 }

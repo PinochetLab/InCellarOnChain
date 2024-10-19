@@ -1,12 +1,12 @@
-﻿using Inventory.Display;
+﻿using Inventory.Render;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Inventory {
-	public delegate void TransformChoiceCallback(ItemTransform? optionalTransform);
 	public class ItemLocator : MonoBehaviour {
 		
-		[SerializeField] private PlayerFieldInventoryDisplay playerFieldInventoryDisplay;
-		[SerializeField] private FieldInventoryDisplay fieldInventoryDisplay;
+		[SerializeField] private GridInventoryRenderer playerRenderer;
+		[SerializeField] private GridInventoryRenderer secondRenderer;
 		
 		[SerializeField] private GameObject locatorWindow;
 		
@@ -15,20 +15,18 @@ namespace Inventory {
 
 		private Item _item;
 		private ItemTransform _oldTransform;
-		private TransformChoiceCallback _transformChoiceCallback;
+		private readonly UnityEvent<ItemTransform?> _transformChoiceCallback = new ();
 
 		private bool _locating;
 
 		private bool _beginIsPlayer = true;
 		private bool _isPlayer = true;
-		private AbstractFieldInventoryDisplay _currentDisplay;
-		private AbstractFieldInventoryDisplay _otherDisplay;
+		private GridInventoryRenderer _currentRenderer;
+		private GridInventoryRenderer _otherRenderer;
 
 		private void Awake() {
 			locatorWindow.SetActive(false);
 			SetLocatorDisplay(_isPlayer);
-			playerFieldInventoryDisplay.Inventory.SetLocator(this);
-			fieldInventoryDisplay.SetLocator(this);
 		}
 
 		private void SwitchLocatorDisplay() {
@@ -38,23 +36,23 @@ namespace Inventory {
 		private void SetLocatorDisplay(bool isPlayer) {
 			_isPlayer = isPlayer;
 			if ( isPlayer ) {
-				_currentDisplay = playerFieldInventoryDisplay;
-				_otherDisplay = fieldInventoryDisplay;
+				_currentRenderer = playerRenderer;
+				_otherRenderer = secondRenderer;
 			}
 			else {
-				_currentDisplay = fieldInventoryDisplay;
-				_otherDisplay = playerFieldInventoryDisplay;
+				_currentRenderer = secondRenderer;
+				_otherRenderer = playerRenderer;
 			}
 		}
 
-		public void Close() {
+		private void Close() {
 			_locating = false;
 			locatorWindow.SetActive(false);
 		}
 
 		private Vector2 GetPosition(Vector2Int cell) {
 			var points = new Vector3[4];
-			_currentDisplay.LocatorPanel.GetWorldCorners(points);
+			_currentRenderer.LocatorRt.GetWorldCorners(points);
 			var p = (Vector2)points[1];
 			p.y *= -1;
 			var d = (Vector2)cell * Constants.CellSize;
@@ -64,19 +62,23 @@ namespace Inventory {
 		public void TryLocateItem(
 			Item item,
 			ItemTransform startTransform, 
-			AbstractFieldInventory inventory,
-			TransformChoiceCallback transformChoiceCallback
+			GridInventory gridInventory,
+			UnityAction<ItemTransform?> transformChoiceCallback
 			) {
+			
 			_item = item;
 			_oldTransform = startTransform;
-			_transformChoiceCallback = transformChoiceCallback;
+			
+			_transformChoiceCallback.RemoveAllListeners();
+			_transformChoiceCallback.AddListener(transformChoiceCallback);
+			
 			locatorWindow.SetActive(true);
 			
-			_beginIsPlayer = inventory == playerFieldInventoryDisplay.Inventory;
+			_beginIsPlayer = gridInventory == playerRenderer.GridInventory;
 			SetLocatorDisplay(_beginIsPlayer);
 			
-			playerFieldInventoryDisplay.Show();
-			fieldInventoryDisplay.Show();
+			playerRenderer.Show();
+			secondRenderer.Show();
 			
 			_locating = true;
 
@@ -86,16 +88,14 @@ namespace Inventory {
 			gridSlotDisplay.SetCellSize(startTransform.RotatedSize(item));
 			gridSlotDisplay.SetUp(item, startTransform.Rotated);
 
-			mouseSlotDisplay.SetPosition(position);;
+			mouseSlotDisplay.SetPosition(position);
 			mouseSlotDisplay.SetCellSize(startTransform.RotatedSize(item));
 			mouseSlotDisplay.SetUp(item, startTransform.Rotated);
 		}
 
 		private static bool IsPointInRect(RectTransform rt, Vector2 point, out Vector2 localPoint) {
-			if ( RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, point, null, out localPoint) ) {
-				return rt.rect.Contains(localPoint);
-			}
-			return false;
+			return RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, point, null, out localPoint) 
+			       && rt.rect.Contains(localPoint);
 		}
 
 		private void Update() {
@@ -118,16 +118,16 @@ namespace Inventory {
 			
 			mouseSlotDisplay.SetPosition(new Vector2(mousePos.x, -mousePos.y) - half);
 			
-			if ( IsPointInRect(_otherDisplay.LocatorPanel, mousePos, out Vector2 lp) ) {
+			if ( IsPointInRect(_otherRenderer.LocatorRt, mousePos, out _) ) {
 				SwitchLocatorDisplay();
 			}
 
-			if ( !IsPointInRect(_currentDisplay.LocatorPanel, mousePos, out Vector2 localPoint) ) {
+			if ( !IsPointInRect(_currentRenderer.LocatorRt, mousePos, out Vector2 localPoint) ) {
 				return;
 			}
 			
 			localPoint.y *= -1;
-			var pos = localPoint + _currentDisplay.LocatorPanel.rect.size / 2 - gridSlotDisplay.ActualSize / 2;
+			var pos = localPoint + _currentRenderer.LocatorRt.rect.size / 2 - gridSlotDisplay.ActualSize / 2;
 			
 			var posInt = new Vector2Int(
 				Mathf.RoundToInt(pos.x / Constants.CellSize),
@@ -135,14 +135,14 @@ namespace Inventory {
 			
 			var itemTransform = new ItemTransform(posInt, gridSlotDisplay.Rotated);
 
-			if ( !_currentDisplay.Inventory.CanLocateItem(_item, itemTransform) ) {
+			if ( !_currentRenderer.GridInventory.CanPlaceItem(_item, itemTransform) ) {
 				return;
 			}
 
 			if ( Input.GetMouseButtonDown(0) ) {
-				var empty = fieldInventoryDisplay.Inventory.IsEmpty() && _isPlayer;
+				var empty = secondRenderer.GridInventory.IsEmpty() && _isPlayer;
 				if ( empty ) {
-					fieldInventoryDisplay.Hide();
+					secondRenderer.Hide();
 				}
 				Close();
 				if ( _isPlayer == _beginIsPlayer ) {
@@ -150,7 +150,7 @@ namespace Inventory {
 				}
 				else {
 					_transformChoiceCallback?.Invoke(ItemTransform.Moved);
-					_currentDisplay.Inventory.AddItem(_item, itemTransform);
+					_currentRenderer.GridInventory.AddItem(_item, itemTransform);
 				}
 			}
 			gridSlotDisplay.SetPosition(GetPosition(posInt));

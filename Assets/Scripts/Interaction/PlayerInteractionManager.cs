@@ -19,7 +19,6 @@ namespace Interaction {
 		private void OnTriggerEnter(Collider other) {
 			var trigger = other.GetComponent<AbstractInteractionTrigger>();
 			if ( trigger ) {
-				interactionScreen.SetActive(true);
 				_triggers.Add(trigger);
 			}
 		}
@@ -28,9 +27,6 @@ namespace Interaction {
 			var trigger = other.GetComponent<AbstractInteractionTrigger>();
 			if ( trigger ) {
 				_triggers.Remove(trigger);
-				if ( _triggers.Count == 0 ) {
-					interactionScreen.SetActive(false);
-				}
 			}
 		}
 
@@ -42,13 +38,18 @@ namespace Interaction {
 		}
 
 		private void ProcessHint() {
-			if ( _triggers.Count == 0 ) return;
+			if ( _triggers.Count == 0 ) {
+				interactionScreen.SetActive(false);
+				return;
+			}
+			interactionScreen.SetActive(true);
 			interactionScreen.SetHintPosition(_triggers[0].HintPoint);
 		}
 
 		private void ProcessInteraction() {
 			if ( _triggers.Count == 0 ) return;
 			if ( !Input.GetButtonDown("Interact") ) return;
+			//interactionScreen.SetActive(false);
 			_available = false;
 			_triggers[0].Notify(Character.Player, interactionScreen, OnSelect);
 		}

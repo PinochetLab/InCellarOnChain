@@ -1,14 +1,15 @@
 ﻿using Interaction.UI;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Interaction {
 	public abstract class AbstractInteractionTrigger : MonoBehaviour, IInteractionTrigger {
-		public abstract void Notify(Character character, InteractionScreen interactionScreen, SelectCallback callback);
+		public abstract void Notify(Character character, InteractionScreen interactionScreen, UnityAction callback);
 		
 		public Vector3 HintPoint => transform.position;
 
 		public static bool IsNull(AbstractInteractionTrigger trigger) {
-			if ( trigger is null ) {
+			if ( !trigger ) {
 				return true;
 			}
 

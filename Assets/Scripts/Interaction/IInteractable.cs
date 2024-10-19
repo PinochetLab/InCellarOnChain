@@ -1,9 +1,11 @@
-﻿namespace Interaction {
-	public interface IInteractable {
-		void Interact(Character character);
+﻿using UnityEngine.Events;
 
-		void Interact(Character character, string interactionName) {
-			Interact(character);
+namespace Interaction {
+	public interface IInteractable {
+		void Interact(Character character, UnityAction callback);
+
+		void Interact(Character character, UnityAction callback, string interactionName) {
+			Interact(character, callback);
 		}
 	}
 }
