@@ -13,4 +13,30 @@ MonoBehaviour:
   m_Name: Wheel
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 7d203bc06a1648a44ad1316331498b73, type: 3}
-  size: {x: 2, y: 2}
+  boundingSize: {x: 4, y: 4}
+  cells:
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
+  - {x: 0, y: 1}
+  - {x: 0, y: 2}
+  - {x: 1, y: 2}
+  - {x: 1, y: 3}
+  - {x: 2, y: 3}
+  - {x: 2, y: 2}
+  - {x: 3, y: 2}
+  - {x: 2, y: 1}
+  - {x: 3, y: 1}
+  - {x: 2, y: 0}
+  sprites:
+  - {fileID: 21300000, guid: 52dcf0518c6217f43b5f07fb2d37e4b8, type: 3}
+  - {fileID: 21300000, guid: f96582d6a65fa5c4c8e047b141f7e453, type: 3}
+  - {fileID: 21300000, guid: c74db58b1b8286248ad78fe7e4222aad, type: 3}
+  - {fileID: 21300000, guid: 08cd4bfe997e23e48b8a6ca54c98be20, type: 3}
+  - {fileID: 21300000, guid: 95d74277553982345bf38680e1eb3ed7, type: 3}
+  - {fileID: 21300000, guid: 70eb2e4491db41a43bb0b8c92f6bedbb, type: 3}
+  - {fileID: 21300000, guid: 3a7b996eef9d20147917d57c2d071471, type: 3}
+  - {fileID: 21300000, guid: 85a80712f48804f4c918b111cc2ab621, type: 3}
+  - {fileID: 21300000, guid: 8c1215f7dee477a43a837a381e96b407, type: 3}
+  - {fileID: 21300000, guid: 47671be5733d6234f805d8e1c70f42da, type: 3}
+  - {fileID: 21300000, guid: 793f6c727cce4534caec7d7a5d3867c5, type: 3}
+  - {fileID: 21300000, guid: 9ff4776f39a468a4f977b10e407a1db6, type: 3}

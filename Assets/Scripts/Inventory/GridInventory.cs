@@ -5,11 +5,15 @@ using UnityEngine.Events;
 
 namespace Inventory {
 	public class GridInventory {
-		private const int Width = 4;
-		private const int Height = 4;
+		private const int Width = 10;
+		private const int Height = 10;
 		
 		public UnityEvent<Transformations> OnUpdate { get; } = new ();
-		public UnityEvent<Slots> OnBuild { get; } = new ();
+		public UnityEvent<int, int> OnBuild { get; } = new ();
+
+		public UnityEvent<Item, ItemTransform> OnAdd { get; } = new();
+		
+		public UnityEvent<Item, ItemTransform> OnRemove { get; } = new();
 		public UnityEvent OnBeginMove { get; } = new ();
 		public UnityEvent OnEndMove { get; } = new ();
 		
@@ -38,7 +42,7 @@ namespace Inventory {
 		}
 		
 		public void Update() {
-			OnBuild?.Invoke(Slots);
+			OnBuild?.Invoke(Width, Height);
 			OnUpdate?.Invoke(Transformations);
 		}
 
@@ -47,7 +51,7 @@ namespace Inventory {
 				var slots = Enumerable.Range(0, Width).Select(_ => InventorySlot.CreateEmpty()).ToList();
 				Slots.Add(slots);
 			}
-			OnBuild?.Invoke(Slots);
+			OnBuild?.Invoke(Width, Height);
 		}
 
 		public bool TryAutoAddItem(Item item) {
@@ -62,19 +66,17 @@ namespace Inventory {
 			for ( var y = 0; y < Height; y++ )
 			for ( var x = 0; x < Width; x++ ) {
 				var position = new Vector2Int(x, y);
-				foreach (var itemTransform in new List<bool> { false, true }
-					         .Select(rot => new ItemTransform(position, rot))) {
-					if ( !CanPlaceItem(item, itemTransform) ) {
-						continue;
+				foreach ( var rotateIndex in Enumerable.Range(0, 4) ) {
+					var it = new ItemTransform(position, rotateIndex);
+					if ( CanPlaceItem(item, it) ) {
+						return it;
 					}
-					return itemTransform;
 				}
 			}
 			return null;
 		}
 		
 		public void AddItem(Item item, ItemTransform it) {
-			Debug.Log(item + "  " + it.Position);
 			Transformations.Add(item, it);
 			FillItem(item, it);
 			OnUpdate?.Invoke(Transformations);
@@ -90,18 +92,19 @@ namespace Inventory {
 		}
 
 		private void FillItem(Item item, ItemTransform it) {
-			it.GetSlots(item).ToList().ForEach(v => Slots.GetSlot(v.x, v.y).SetItem(item));
+			it.GetCells(item).ToList().ForEach(v => Slots.GetSlot(v.x, v.y).SetItem(item));
 		}
 		
 		private void EmptyItem(Item item, ItemTransform it) {
-			it.GetSlots(item).ToList().ForEach(v => Slots.GetSlot(v.x, v.y).SetEmpty());
+			it.GetCells(item).ToList().ForEach(v => Slots.GetSlot(v.x, v.y).SetEmpty());
 		}
 		
 		public void TryMoveItem(Item item, ItemTransform it) {
 			OnBeginMove?.Invoke();
 			Transformations.Remove(item, it);
 			
-			OnUpdate?.Invoke(Transformations);
+			//OnUpdate?.Invoke(Transformations);
+			OnRemove?.Invoke(item, it);
 			
 			EmptyItem(item, it);
 
@@ -116,12 +119,27 @@ namespace Inventory {
 				it = maybeTransform ?? it;
 				AddItem(item, it);
 				FillItem(item, it);
-				OnUpdate?.Invoke(Transformations);
+				//OnUpdate?.Invoke(Transformations);
+				OnAdd?.Invoke(item, it);
 			}
+		}
+
+		public ItemTransform Correct(Item item, ItemTransform it) {
+			var size = it.RotatedSize(item);
+			var position = it.Pos;
+			var old = position;
+			position.x = Mathf.Clamp(position.x, 0, Width - size.x);
+			position.y = Mathf.Clamp(position.y, 0, Height - size.y);
+			it.SetPosition(position);
+			return it;
+		}
+		
+		public bool CanPasteItem(Item item, ItemTransform itemTransform) {
+			return itemTransform.GetCells(item).All(IsPositionValid);
 		}
 		
 		public bool CanPlaceItem(Item item, ItemTransform itemTransform) {
-			return itemTransform.GetSlots(item).All(v => IsPositionValid(v) && IsSlotEmpty(v));
+			return itemTransform.GetCells(item).All(v => IsPositionValid(v) && IsSlotEmpty(v));
 		}
 		
 		public bool HasItem(Item item) {
@@ -139,7 +157,7 @@ namespace Inventory {
 		public void Load(Configuration configuration) {
 			Transformations = configuration.Transformations;
 			Slots = configuration.Slots;
-			OnBuild?.Invoke(Slots);
+			OnBuild?.Invoke(Width, Height);
 			OnUpdate?.Invoke(Transformations);
 		}
 	}

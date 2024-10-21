@@ -60,6 +60,7 @@ namespace Interaction {
 		
 		private IEnumerator WaitForFrame() {
 			yield return new WaitUntil(() => !Input.GetButtonDown("Action"));
+			//interactionScreen.SetActive(true);
 			_available = true;
 		}
 	}

@@ -13,4 +13,30 @@ MonoBehaviour:
   m_Name: Key
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: d6c13f44ae3381e47a147b8be1267262, type: 3}
-  size: {x: 2, y: 1}
+  boundingSize: {x: 6, y: 3}
+  cells:
+  - {x: 1, y: 1}
+  - {x: 0, y: 1}
+  - {x: 2, y: 1}
+  - {x: 3, y: 1}
+  - {x: 4, y: 1}
+  - {x: 5, y: 1}
+  - {x: 4, y: 0}
+  - {x: 4, y: 2}
+  - {x: 5, y: 0}
+  - {x: 5, y: 2}
+  - {x: 3, y: 0}
+  - {x: 3, y: 2}
+  sprites:
+  - {fileID: 21300000, guid: d5ed06c60cc0e0a41a5a1c62239785a8, type: 3}
+  - {fileID: 21300000, guid: 4a9e40a60686c3f4e83738e80dfd0900, type: 3}
+  - {fileID: 21300000, guid: 25390b09654c57c46a449680d7b5d583, type: 3}
+  - {fileID: 21300000, guid: b0f77636edbf09c429cfa88039d11873, type: 3}
+  - {fileID: 21300000, guid: 932c9f34eaa649f4987828a857e9d2c0, type: 3}
+  - {fileID: 21300000, guid: 8d2da243d50541d499c9bb4d2ab51bcb, type: 3}
+  - {fileID: 21300000, guid: a2b5a9ae55e2ba944b6051d748c5ab99, type: 3}
+  - {fileID: 21300000, guid: 9f673f14386a8e147b66374dfee2d991, type: 3}
+  - {fileID: 21300000, guid: c2021cb8855fccf4388ec233b841c34f, type: 3}
+  - {fileID: 21300000, guid: 475ca1a7500099842809a1a2b6c13e88, type: 3}
+  - {fileID: 21300000, guid: e6bf61859ba5cd94f810bb91b4d54938, type: 3}
+  - {fileID: 21300000, guid: da7f1ceb60cdb8a41a1614191eabc9aa, type: 3}

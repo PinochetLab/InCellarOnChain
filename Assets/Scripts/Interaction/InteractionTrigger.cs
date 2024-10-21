@@ -28,7 +28,7 @@ namespace Action {
 							return;
 						}
 						var v = variant.Value;
-						v.interactable.Interact(character, callback);
+						v.interactable.Interact(character, callback, v.name);
 					}
 			}
 		}

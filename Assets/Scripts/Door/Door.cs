@@ -11,5 +11,15 @@ namespace Door {
 			ChangeState(needs.CharacterPosition);
 			callback?.Invoke();
 		}
+		
+		public override void Interact(Character character, UnityAction callback, string interactionName) {
+			if ( interactionName == "opened" ) {
+				Interact(character, callback);
+			}
+			else {
+				TryOpen();
+				callback?.Invoke();
+			}
+		}
 	}
 }

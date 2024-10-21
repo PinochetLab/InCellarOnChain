@@ -13,4 +13,30 @@ MonoBehaviour:
   m_Name: Ring
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: f6480a6f85ee03740b34875904387ab8, type: 3}
-  size: {x: 1, y: 1}
+  boundingSize: {x: 4, y: 4}
+  cells:
+  - {x: 0, y: 1}
+  - {x: 1, y: 0}
+  - {x: 2, y: 0}
+  - {x: 0, y: 2}
+  - {x: 0, y: 0}
+  - {x: 3, y: 0}
+  - {x: 3, y: 1}
+  - {x: 3, y: 2}
+  - {x: 3, y: 3}
+  - {x: 2, y: 3}
+  - {x: 1, y: 3}
+  - {x: 0, y: 3}
+  sprites:
+  - {fileID: 21300000, guid: 02fd2efe5aceaab41ad52f890ab14e21, type: 3}
+  - {fileID: 21300000, guid: 9768c3163d1e5244996803a0edd0816a, type: 3}
+  - {fileID: 21300000, guid: d8c64a9eec5211f4a92db9e084dbba0f, type: 3}
+  - {fileID: 21300000, guid: 62a60dde89db89249aded755a81e35cb, type: 3}
+  - {fileID: 21300000, guid: ac6905c650a7e7242bfca6876bfe6bed, type: 3}
+  - {fileID: 21300000, guid: 6ef376dbcb3ccdb4c829ca6f86a59937, type: 3}
+  - {fileID: 21300000, guid: d947ed43d72249a44a70de76c2bb6a22, type: 3}
+  - {fileID: 21300000, guid: 651e9f5752b0ca749b9e23288481a928, type: 3}
+  - {fileID: 21300000, guid: 9771ca777b55b584782a257a1a0361ff, type: 3}
+  - {fileID: 21300000, guid: 5299e778c0ba82b4b9f9fa9c96fa16ad, type: 3}
+  - {fileID: 21300000, guid: 5829b593d448a3e4e9f7c19f418b012a, type: 3}
+  - {fileID: 21300000, guid: 4fe1bbbf4d876404ead94d6da917c593, type: 3}

@@ -12,5 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d6718e69b844558a544bae63bec6bad, type: 3}
   m_Name: Hammer
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: 24a674c1fc06b154a88a9b880c73e13d, type: 3}
-  size: {x: 1, y: 2}
+  icon: {fileID: 21300000, guid: 2c1dea582976187469d221c7f27325c5, type: 3}
+  boundingSize: {x: 3, y: 4}
+  cells:
+  - {x: 1, y: 3}
+  - {x: 1, y: 2}
+  - {x: 1, y: 1}
+  - {x: 0, y: 0}
+  - {x: 1, y: 0}
+  - {x: 2, y: 0}
+  sprites:
+  - {fileID: 21300000, guid: 14c2e09912d50fd45af805a4de467ed0, type: 3}
+  - {fileID: 21300000, guid: 9523b80cde664de4882b0422081e4875, type: 3}
+  - {fileID: 21300000, guid: d17c9179595b1984682a3ffb83c5dc85, type: 3}
+  - {fileID: 21300000, guid: 1991ad7c48a3572438432a96ea678ae0, type: 3}
+  - {fileID: 21300000, guid: b1649d267488f8743b79723df983fbd5, type: 3}
+  - {fileID: 21300000, guid: cf9d53ce4577efa4fb8d14958034b802, type: 3}

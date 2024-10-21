@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace Door {
 	public abstract class AbstractDoor : AbstractInteractable {
-		
+		private static readonly int Open = Animator.StringToHash("TryOpen");
+
 		/*[SerializeField] private DoorCollider doorCollider;
 		[SerializeField] private Transform hingeTransform;
 
@@ -121,6 +122,8 @@ namespace Door {
 			doorRigidbody.isKinematic = true;
 		}*/
 		[SerializeField] private Transform hingeTransform;
+		
+		[SerializeField] private Animator animator;
 
 		private bool _opened;
 
@@ -136,6 +139,10 @@ namespace Door {
 				angle = OpenedAngle * (fromLeft ? 1 : -1);
 			}
 			hingeTransform.localRotation = Quaternion.Euler(0, angle, 0);
+		}
+
+		protected void TryOpen() {
+			animator.SetTrigger(Open);
 		}
 	}
 }
