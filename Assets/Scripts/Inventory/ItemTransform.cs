@@ -1,44 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Inventory.Render;
 using UnityEngine;
 
 namespace Inventory {
 	[Serializable]
 	public struct ItemTransform : IEquatable<ItemTransform> {
-		private Vector2Int _position;
+		[SerializeField] private Vector2Int position;
 
-		private int _rotateIndex;
+		[SerializeField] private int rotateIndex;
 
-		public Vector2Int Pos => _position;
+		public Vector2Int Position => position;
+		
+		public int RotateIndex => rotateIndex;
 		
 		public static ItemTransform Moved => new (-Vector2Int.one, 0);
 
 		public Vector2Int RotatedSize(Item item) {
 			var size = item.BoundingSize;
-			if ( _rotateIndex % 2 == 1 ) {
+			if ( rotateIndex % 2 == 1 ) {
 				size = new Vector2Int(size.y, size.x);
 			}
 			return size;
 		}
 		
-		public bool IsMoved => _position == -Vector2Int.one && _rotateIndex == 0;
+		public bool IsMoved => position == -Vector2Int.one && rotateIndex == 0;
 
 		public ItemTransform(Vector2Int position, int rotateIndex) {
-			_position = position;
-			_rotateIndex = rotateIndex;
+			this.position = position;
+			this.rotateIndex = rotateIndex;
 		}
 		
 		public ItemTransform(ItemTransform other) {
-			_position = other._position;
-			_rotateIndex = other._rotateIndex;
+			position = other.position;
+			rotateIndex = other.rotateIndex;
 		}
 
-		private Vector2Int Transform(Vector2Int cell, Item item) {
+		public Vector2Int Transform(Vector2Int cell, Item item) {
 			var boundingSize = item.BoundingSize;
 			var x = cell.x;
 			var y = cell.y;
-			return _position + _rotateIndex switch {
+			return position + rotateIndex switch {
 				0 => new Vector2Int(x, y),
 				1 => new Vector2Int(y, boundingSize.x - 1 - x),
 				2 => new Vector2Int(boundingSize.x - 1 - x, boundingSize.y - 1 - y),
@@ -52,30 +55,42 @@ namespace Inventory {
 			return item.Cells.Select(cell => transform.Transform(cell, item));
 		}
 
-		public IEnumerable<Tuple<Vector2Int, Sprite, float>> GetSprites(Item item) {
+		public IEnumerable<Tuple<Vector2Int, Sprite, EdgeInfo>> GetSprites(Item item) {
+			var cells = GetCells(item).ToList();
 			foreach ( var cell in item.Cells ) {
 				var v = Transform(cell, item);
 				var s = item.GetSprite(cell);
-				var a = 90f * _rotateIndex;
-				yield return new Tuple<Vector2Int, Sprite, float>(v, s, a);
+				
+				var left = !cells.Contains(v + Vector2Int.left);
+				var right = !cells.Contains(v + Vector2Int.right);
+				var top = !cells.Contains(v + Vector2Int.down);
+				var bottom = !cells.Contains(v + Vector2Int.up);
+				
+				var edgeInfo = new EdgeInfo(left, right, top, bottom);
+				
+				yield return new Tuple<Vector2Int, Sprite, EdgeInfo>(v, s, edgeInfo);
 			}
+		}
+
+		public float GetAngle() {
+			return 90f * rotateIndex;
 		}
 
 		public bool Equals(ItemTransform other)
 		{
-			return _position.Equals(other._position) && _rotateIndex.Equals(other._rotateIndex);
+			return position.Equals(other.position) && rotateIndex.Equals(other.rotateIndex);
 		}
 
 		public void Rotate() {
-			_rotateIndex = (_rotateIndex + 1) % 4;
+			rotateIndex = (rotateIndex + 1) % 4;
 		}
 
-		public void SetPosition(Vector2Int position) {
-			_position = position;
+		public void SetPosition(Vector2Int pos) {
+			position = pos;
 		}
 
 		public override string ToString() {
-			return $"({_position.x}, {_position.y}: {_rotateIndex})";
+			return $"({position.x}, {position.y}: {rotateIndex})";
 		}
 	}
 }

@@ -8,8 +8,6 @@ namespace Inventory.Render {
 	public class SlotRenderer : MonoBehaviour, IPointerDownHandler {
 		[SerializeField] private GameObject itemGo;
 		[SerializeField] private GameObject emptyGo;
-		[SerializeField] private GameObject greenSelectionGo;
-		[SerializeField] private GameObject redSelectionGo;
 		[SerializeField] private Image itemImage;
 
 		[SerializeField] private GameObject leftBorder;
@@ -20,23 +18,17 @@ namespace Inventory.Render {
 		private UnityEvent _onClick = new();
 
 		public void SetEmpty() {
-			SetSelected(false);
 			_onClick.RemoveAllListeners();
 			emptyGo.SetActive(true);
 			itemGo.SetActive(false);
 		}
-
-		public void SetSelected(bool selected, bool green = true) {
-			greenSelectionGo.SetActive(selected && green);
-			redSelectionGo.SetActive(selected && !green);
-		}
 		
-		public void SetItem(Item item, Sprite sprite, Vector2Int v, List<Vector2Int> cells, float angle, UnityAction onClick) {
-			leftBorder.SetActive(!cells.Contains(v + Vector2Int.left));
-			rightBolder.SetActive(!cells.Contains(v + Vector2Int.right));
-			topBolder.SetActive(!cells.Contains(v + Vector2Int.down));
-			bottomBolder.SetActive(!cells.Contains(v + Vector2Int.up));
-			SetSelected(false);
+		public void SetItem(Sprite sprite, EdgeInfo edgeInfo, float angle, UnityAction onClick) {
+			leftBorder.SetActive(edgeInfo.Left);
+			rightBolder.SetActive(edgeInfo.Right);
+			topBolder.SetActive(edgeInfo.Top);
+			bottomBolder.SetActive(edgeInfo.Bottom);
+			
 			_onClick.RemoveAllListeners();
 			_onClick.AddListener(onClick);
 			emptyGo.SetActive(false);

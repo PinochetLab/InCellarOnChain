@@ -69,28 +69,11 @@ namespace Inventory.Render {
 			}
 		}
 
-		public void Deselect() {
-			if ( _selectionItem != null ) {
-				foreach ( var cell in _selectionIt.GetCells(_selectionItem) ) {
-					_slots[cell.y][cell.x].SetSelected(false);
-				}
-			}
-		}
-
-		public void Select(Item item, ItemTransform it, bool canLocate) {
-			Deselect();
-			_selectionItem = item;
-			_selectionIt = new ItemTransform(it);
-			foreach ( var (cell, sprite, angle) in it.GetSprites(item) ) {
-				_slots[cell.y][cell.x].SetSelected(true, canLocate);
-				//_slots[cell.y][cell.x].SetItem(item, sprite, cell, it.GetCells(item).ToList(), angle, null);
-			}
-		}
-
 		private void AddItem(Item item, ItemTransform it) {
+			var angle = it.GetAngle();
 			_oldTransformations.Add(item, it);
-			foreach ( var (cell, sprite, angle) in it.GetSprites(item) ) {
-				_slots[cell.y][cell.x].SetItem(item, sprite, cell, it.GetCells(item).ToList(), angle, TryMove);
+			foreach ( var (cell, sprite, edgeInfo) in it.GetSprites(item) ) {
+				_slots[cell.y][cell.x].SetItem(sprite, edgeInfo, angle, TryMove);
 			}
 			return;
 			void TryMove() {
@@ -116,8 +99,9 @@ namespace Inventory.Render {
 			_oldTransformations = new Transformations(transformations);
 			
 			foreach ( var (item, it) in transformations ) {
-				foreach ( var (cell, sprite, angle) in it.GetSprites(item) ) {
-					_slots[cell.y][cell.x].SetItem(item, sprite, cell, it.GetCells(item).ToList(), angle, TryMove);
+				var angle = it.GetAngle();
+				foreach ( var (cell, sprite, edgeInfo) in it.GetSprites(item) ) {
+					_slots[cell.y][cell.x].SetItem(sprite, edgeInfo, angle, TryMove);
 				}
 				continue;
 

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,10 +15,10 @@ namespace Inventory {
 		public UnityEvent<Item, ItemTransform> OnRemove { get; } = new();
 		public UnityEvent OnBeginMove { get; } = new ();
 		public UnityEvent OnEndMove { get; } = new ();
-		
-		protected Transformations Transformations = new ();
-		
-		protected Slots Slots = new ();
+
+		private Transformations _transformations = new ();
+
+		private Slots _slots = new ();
 		
 		private ItemLocator _itemLocator;
 
@@ -32,24 +31,24 @@ namespace Inventory {
 		}
 
 		public void Reset() {
-			Slots.Clear();
-			Transformations.Clear();
+			_slots.Clear();
+			_transformations.Clear();
 			Build();
 		}
 
 		public void Clear() {
-			Transformations.Clear();
+			_transformations.Clear();
 		}
 		
 		public void Update() {
 			OnBuild?.Invoke(Width, Height);
-			OnUpdate?.Invoke(Transformations);
+			OnUpdate?.Invoke(_transformations);
 		}
 
 		private void Build() {
 			for ( var y = 0; y < Height; y++ ) {
 				var slots = Enumerable.Range(0, Width).Select(_ => InventorySlot.CreateEmpty()).ToList();
-				Slots.Add(slots);
+				_slots.Add(slots);
 			}
 			OnBuild?.Invoke(Width, Height);
 		}
@@ -77,9 +76,9 @@ namespace Inventory {
 		}
 		
 		public void AddItem(Item item, ItemTransform it) {
-			Transformations.Add(item, it);
+			_transformations.Add(item, it);
 			FillItem(item, it);
-			OnUpdate?.Invoke(Transformations);
+			OnUpdate?.Invoke(_transformations);
 		}
 		
 		private static bool IsPositionValid(Vector2Int position) {
@@ -88,25 +87,30 @@ namespace Inventory {
 		}
 
 		private bool IsSlotEmpty(Vector2Int position) {
-			return Slots.GetSlot(position.x, position.y).IsEmpty();
+			return _slots.GetSlot(position.x, position.y).IsEmpty();
 		}
 
 		private void FillItem(Item item, ItemTransform it) {
-			it.GetCells(item).ToList().ForEach(v => Slots.GetSlot(v.x, v.y).SetItem(item));
+			it.GetCells(item).ToList().ForEach(v => _slots.GetSlot(v.x, v.y).SetItem(item));
 		}
 		
 		private void EmptyItem(Item item, ItemTransform it) {
-			it.GetCells(item).ToList().ForEach(v => Slots.GetSlot(v.x, v.y).SetEmpty());
+			it.GetCells(item).ToList().ForEach(v => _slots.GetSlot(v.x, v.y).SetEmpty());
+		}
+
+		public void RemoveItem(Item item, ItemTransform it) {
+			_transformations.Remove(item, it);
+			OnRemove?.Invoke(item, it);
 		}
 		
 		public void TryMoveItem(Item item, ItemTransform it) {
-			OnBeginMove?.Invoke();
-			Transformations.Remove(item, it);
+			_transformations.Remove(item, it);
 			
-			//OnUpdate?.Invoke(Transformations);
 			OnRemove?.Invoke(item, it);
 			
 			EmptyItem(item, it);
+			
+			OnBeginMove?.Invoke();
 
 			_itemLocator.TryLocateItem(item, it, this, TryMoveCallback);
 			return;
@@ -124,10 +128,9 @@ namespace Inventory {
 			}
 		}
 
-		public ItemTransform Correct(Item item, ItemTransform it) {
+		public static ItemTransform Correct(Item item, ItemTransform it) {
 			var size = it.RotatedSize(item);
-			var position = it.Pos;
-			var old = position;
+			var position = it.Position;
 			position.x = Mathf.Clamp(position.x, 0, Width - size.x);
 			position.y = Mathf.Clamp(position.y, 0, Height - size.y);
 			it.SetPosition(position);
@@ -142,23 +145,28 @@ namespace Inventory {
 			return itemTransform.GetCells(item).All(v => IsPositionValid(v) && IsSlotEmpty(v));
 		}
 		
+		public bool CanPlaceItem(Item item, ItemTransform itemTransform, Item exItem, ItemTransform exIt) {
+			var cells = exIt.GetCells(exItem).ToHashSet();
+			return itemTransform.GetCells(item).All(v => IsPositionValid(v) && (_slots.GetSlot(v.x, v.y).IsEmpty() || cells.Contains(v)));
+		}
+		
 		public bool HasItem(Item item) {
-			return Transformations.Contains(item);
+			return _transformations.Contains(item);
 		}
 		
 		public bool IsEmpty() {
-			return Transformations.IsEmpty();
+			return _transformations.IsEmpty();
 		}
 
 		public Configuration Save() {
-			return new Configuration(Transformations, Slots);
+			return new Configuration(_transformations, _slots);
 		}
 
 		public void Load(Configuration configuration) {
-			Transformations = configuration.Transformations;
-			Slots = configuration.Slots;
+			_transformations = configuration.Transformations;
+			_slots = configuration.Slots;
 			OnBuild?.Invoke(Width, Height);
-			OnUpdate?.Invoke(Transformations);
+			OnUpdate?.Invoke(_transformations);
 		}
 	}
 }

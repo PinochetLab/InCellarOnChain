@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Inventory {
+﻿namespace Inventory {
 	public enum SlotStatus {Empty, Denied, Item}
 	
 	public class InventorySlot {
@@ -20,6 +18,10 @@ namespace Inventory {
 		public void AddItem(Item item) {
 			_status = SlotStatus.Item;
 			_item = item;
+		}
+
+		public bool CompareItem(Item item) {
+			return _item == item;
 		}
 		
 		public static InventorySlot CreateEmpty() => new (SlotStatus.Empty, null);

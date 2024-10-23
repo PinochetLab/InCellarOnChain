@@ -1,4 +1,7 @@
-﻿using Inventory.Render;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Inventory.Combining;
+using Inventory.Render;
 using UnityEngine;
 using UnityEngine.Events;
 
